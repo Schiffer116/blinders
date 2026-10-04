@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Blinders</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { width: 340px; padding: 14px; }
+    header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+    h1 { font-size: 17px; margin: 0; }
+    #summary { color: var(--muted); font-size: 12px; }
+    ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    li { background: var(--surface); border-radius: var(--radius); padding: 8px 10px; }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--blocked); }
+    .dot.open { background: var(--open); }
+    .name { flex: 1; min-width: 0; }
+    .name strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .status { color: var(--muted); font-size: 12px; }
+    .row .remove { visibility: hidden; }
+    li:hover .remove { visibility: visible; }
+    .picker { margin-top: 8px; }
+    .picker p { margin: 0 0 6px; font-size: 12px; color: var(--muted); }
+    form { display: flex; gap: 6px; margin-top: 12px; }
+    input {
+      flex: 1; font: inherit; padding: 6px 10px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--bg); color: var(--text);
+    }
+    #suggestions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
+    #suggestions span { color: var(--muted); font-size: 12px; }
+    #suggestions button { font-size: 12px; padding: 3px 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Blinders</h1>
+    <span id="summary"></span>
+  </header>
+  <ul id="sites"></ul>
+  <form id="add-form">
+    <input id="add-input" placeholder="Block another site, e.g. news.com" autocomplete="off">
+    <button type="submit">Add</button>
+  </form>
+  <p class="error" id="error"></p>
+  <div id="suggestions"></div>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

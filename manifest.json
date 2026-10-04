@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Blinders",
+  "version": "0.1.0",
+  "description": "Block distracting websites. Unblock them for a set time when you really need to.",
+  "permissions": [
+    "declarativeNetRequest",
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Blinders",
+    "default_popup": "popup.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "blocked.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "guard.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}
