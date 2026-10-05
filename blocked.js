@@ -1,5 +1,10 @@
 import { DURATIONS, findSiteForUrl, isBlocked } from './sites.js';
 import { send, el } from './ui.js';
+import { randomQuote } from './quotes.js';
+
+const quote = randomQuote();
+document.getElementById('quote-text').textContent = `“${quote.text}”`;
+document.getElementById('quote-ref').textContent = `Marcus Aurelius, Meditations ${quote.ref}`;
 
 // The blocking rule puts the original URL after the '#'.
 const originalUrl = location.hash.slice(1);

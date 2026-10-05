@@ -7,6 +7,6 @@
   const host = location.hostname.toLowerCase();
   const site = sites.find((s) => s.domains.some((d) => host === d || host.endsWith(`.${d}`)));
   if (!site) return;
-  const unblocked = site.unblockedUntil === 'forever' || site.unblockedUntil > Date.now();
+  const unblocked = site.unblockedUntil === 'tab' || site.unblockedUntil > Date.now();
   if (!unblocked) location.replace(`${chrome.runtime.getURL('blocked.html')}#${location.href}`);
 })();

@@ -9,6 +9,11 @@
     main { max-width: 420px; text-align: center; }
     h1 { font-size: 28px; margin: 0 0 8px; }
     .lead { color: var(--muted); margin: 0 0 32px; }
+    #quote { margin: 0 0 32px; }
+    #quote blockquote {
+      margin: 0; font: italic 18px/1.55 Georgia, "Times New Roman", serif; text-wrap: balance;
+    }
+    #quote figcaption { margin-top: 10px; font-size: 13px; color: var(--muted); }
     #unblock { border-top: 1px solid var(--border); padding-top: 20px; }
     #unblock p { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
     .durations { justify-content: center; }
@@ -19,6 +24,10 @@
   <main>
     <h1 id="title">Stay focused.</h1>
     <p class="lead" id="lead">This site is blocked by Blinders.</p>
+    <figure id="quote">
+      <blockquote id="quote-text"></blockquote>
+      <figcaption id="quote-ref"></figcaption>
+    </figure>
     <section id="unblock" hidden>
       <button class="ghost" id="unblock-toggle">I really need this site…</button>
       <div id="picker" hidden>

@@ -2,7 +2,8 @@
 //
 // A stored site looks like:
 //   { id, label, domains: [...], unblockedUntil }
-// where unblockedUntil is 0 (blocked), a ms timestamp (unblocked until then), or 'forever'.
+// where unblockedUntil is 0 (blocked), a ms timestamp (unblocked until then), or 'tab' (no time limit).
+// Every unblock also stores `unblockTab`, the tab it was unblocked from; closing that tab re-blocks the site.
 
 export const DEFAULT_SITES = [
   { id: 'facebook', label: 'Facebook', domains: ['facebook.com', 'fb.com', 'messenger.com'] },
@@ -20,14 +21,14 @@ export const SUGGESTED_SITES = [
 ];
 
 export const DURATIONS = [
+  { label: '1 min', minutes: 1 },
+  { label: '5 min', minutes: 5 },
   { label: '15 min', minutes: 15 },
-  { label: '30 min', minutes: 30 },
-  { label: '1 hour', minutes: 60 },
-  { label: 'Forever', minutes: null },
+  { label: 'Until I close this tab', minutes: null },
 ];
 
 export function isBlocked(site, now = Date.now()) {
-  return site.unblockedUntil !== 'forever' && !(site.unblockedUntil > now);
+  return site.unblockedUntil !== 'tab' && !(site.unblockedUntil > now);
 }
 
 // requestDomains in the blocking rules also match subdomains, so mirror that here.

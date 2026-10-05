@@ -90,19 +90,22 @@ function updateSite(id, change) {
 
 async function block(id) {
   await chrome.alarms.clear(ALARM_PREFIX + id);
-  const sites = await updateSite(id, (s) => { s.unblockedUntil = 0; });
+  const sites = await updateSite(id, (s) => { s.unblockedUntil = 0; delete s.unblockTab; });
   await coverOpenTabs(sites.find((s) => s.id === id));
   return sites;
 }
 
-async function unblock(id, minutes) {
+// Every unblock is tied to tab `tabId` and ends when that tab closes. A timed unblock also ends
+// when its alarm fires; minutes == null ("Until I close this tab") has no time limit.
+async function unblock(id, minutes, tabId) {
+  if (tabId == null) throw new Error('No tab to tie this unblock to');
   await chrome.alarms.clear(ALARM_PREFIX + id);
   if (minutes == null) {
-    return updateSite(id, (s) => { s.unblockedUntil = 'forever'; });
+    return updateSite(id, (s) => { s.unblockedUntil = 'tab'; s.unblockTab = tabId; });
   }
   const until = Date.now() + minutes * 60_000;
   await chrome.alarms.create(ALARM_PREFIX + id, { when: until });
-  return updateSite(id, (s) => { s.unblockedUntil = until; });
+  return updateSite(id, (s) => { s.unblockedUntil = until; s.unblockTab = tabId; });
 }
 
 function add({ preset, input }) {
@@ -128,23 +131,45 @@ function remove(id) {
   });
 }
 
-// Runs on install and browser start: expire any unblocks that lapsed while Chrome was closed,
-// make sure alarms exist for the rest, and rebuild the rules from storage.
-function reconcile() {
+// Runs on install/update and browser start: re-block anything whose unblock ended while the
+// extension wasn't running, make sure alarms exist for the rest, and rebuild the rules from storage.
+// Tab IDs don't survive a browser restart (and get reused), so every tab-tied unblock ends at startup.
+function reconcile({ startup }) {
   return serial(async () => {
     const sites = await loadSites();
     const now = Date.now();
+    const ended = [];
     for (const s of sites) {
-      if (typeof s.unblockedUntil !== 'number' || s.unblockedUntil === 0) continue;
-      if (s.unblockedUntil <= now) s.unblockedUntil = 0;
-      else await chrome.alarms.create(ALARM_PREFIX + s.id, { when: s.unblockedUntil });
+      if (s.unblockedUntil === 0) continue;
+      const timeLeft = s.unblockedUntil === 'tab' || (typeof s.unblockedUntil === 'number' && s.unblockedUntil > now);
+      // Unblocks saved before every unblock was tied to a tab have no unblockTab; only their timer applies.
+      const tabOpen = s.unblockTab == null
+        ? s.unblockedUntil !== 'tab'
+        : !startup && (await chrome.tabs.get(s.unblockTab).then(() => true, () => false));
+      if (timeLeft && tabOpen) {
+        if (s.unblockedUntil !== 'tab') await chrome.alarms.create(ALARM_PREFIX + s.id, { when: s.unblockedUntil });
+        continue;
+      }
+      // Lapsed timer, closed tab, or the old 'forever' value from before that option was removed.
+      s.unblockedUntil = 0;
+      delete s.unblockTab;
+      ended.push(s);
     }
-    return saveSites(sites);
+    await saveSites(sites);
+    for (const s of ended) await coverOpenTabs(s);
+    return sites;
   });
 }
 
-chrome.runtime.onInstalled.addListener(reconcile);
-chrome.runtime.onStartup.addListener(reconcile);
+chrome.runtime.onInstalled.addListener(() => reconcile({ startup: false }));
+chrome.runtime.onStartup.addListener(() => reconcile({ startup: true }));
+
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  const sites = await loadSites();
+  for (const s of sites) {
+    if (!isBlocked(s) && s.unblockTab === tabId) await block(s.id);
+  }
+});
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === BADGE_TICK) syncBadges();
@@ -159,15 +184,16 @@ chrome.tabs.onActivated.addListener(() => syncBadges());
 const handlers = {
   getSites: () => loadSites(),
   block: (msg) => block(msg.id),
-  unblock: (msg) => unblock(msg.id, msg.minutes),
+  // The blocked page is itself the tab being unblocked; the popup passes the active tab's id.
+  unblock: (msg, sender) => unblock(msg.id, msg.minutes, msg.tabId ?? sender.tab?.id),
   add: (msg) => add(msg),
   remove: (msg) => remove(msg.id),
 };
 
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   const handler = handlers[msg?.type];
   if (!handler) return false;
-  handler(msg).then(
+  handler(msg, sender).then(
     (sites) => sendResponse({ sites }),
     (err) => sendResponse({ error: err.message }),
   );

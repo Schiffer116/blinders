@@ -25,9 +25,9 @@ async function run(type, payload) {
 
 function statusText(site) {
   if (isBlocked(site)) return 'Blocked';
-  if (site.unblockedUntil === 'forever') return 'Unblocked until you re-block';
+  if (site.unblockedUntil === 'tab') return 'Unblocked until you close its tab';
   const at = new Date(site.unblockedUntil).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-  return `Unblocked · re-blocks at ${at} (${formatRemaining(site.unblockedUntil)} left)`;
+  return `Unblocked · re-blocks at ${at} or when its tab closes (${formatRemaining(site.unblockedUntil)} left)`;
 }
 
 function renderSite(site) {
@@ -54,7 +54,12 @@ function renderSite(site) {
       el('div', { className: 'durations' },
         ...DURATIONS.map((d) => el('button', {
           textContent: d.label,
-          onclick: () => { pickingFor = null; run('unblock', { id: site.id, minutes: d.minutes }); },
+          onclick: async () => {
+            pickingFor = null;
+            // "This tab" from the popup means the tab the popup was opened over.
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            run('unblock', { id: site.id, minutes: d.minutes, tabId: tab?.id });
+          },
         })),
         el('button', { className: 'ghost', textContent: 'Cancel', onclick: () => { pickingFor = null; render(); } }))));
   }
