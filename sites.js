@@ -20,12 +20,12 @@ export const SUGGESTED_SITES = [
   { id: 'twitch', label: 'Twitch', domains: ['twitch.tv'] },
 ];
 
-// `default` is what Enter in the reason box picks.
+// `default` is the duration selected when a picker opens.
 export const DURATIONS = [
   { label: '1 min', minutes: 1, default: true },
   { label: '5 min', minutes: 5 },
   { label: '15 min', minutes: 15 },
-  { label: 'Until I close this tab', minutes: null },
+  { label: 'No limit', minutes: null },
 ];
 
 export function isBlocked(site, now = Date.now()) {

@@ -67,6 +67,7 @@ function renderSite(site) {
     item.append(el('div', { className: 'picker' },
       el('p', { textContent: blocked ? `Unblock ${site.label} for…` : 'New limit, counted from now:' }),
       durationPicker(DURATIONS, {
+        action: blocked ? 'Unblock' : 'Set limit',
         reason: blocked ? { draft: reasonDraft, onInput: (v) => { reasonDraft = v; } } : null,
         onPick,
         extra: [cancel],

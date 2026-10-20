@@ -33,6 +33,7 @@ async function init() {
   };
 
   document.getElementById('picker-body').replaceChildren(durationPicker(DURATIONS, {
+    action: 'Unblock',
     reason: {},
     onPick: async (d, reason) => {
       try {
