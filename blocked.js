@@ -1,5 +1,5 @@
 import { DURATIONS, findSiteForUrl, isBlocked } from './sites.js';
-import { send, el } from './ui.js';
+import { send, durationPicker } from './ui.js';
 import { randomQuote } from './quotes.js';
 
 const quote = randomQuote();
@@ -26,19 +26,23 @@ async function init() {
 
   const picker = document.getElementById('picker');
   const toggle = document.getElementById('unblock-toggle');
-  toggle.onclick = () => { toggle.hidden = true; picker.hidden = false; };
+  toggle.onclick = () => {
+    toggle.hidden = true;
+    picker.hidden = false;
+    picker.querySelector('textarea.reason').focus();
+  };
 
-  document.getElementById('durations').replaceChildren(...DURATIONS.map((d) => el('button', {
-    textContent: d.label,
-    onclick: async () => {
+  document.getElementById('picker-body').replaceChildren(durationPicker(DURATIONS, {
+    reason: {},
+    onPick: async (d, reason) => {
       try {
-        await send('unblock', { id: site.id, minutes: d.minutes });
+        await send('unblock', { id: site.id, minutes: d.minutes, reason });
         goBack();
       } catch (err) {
         document.getElementById('error').textContent = err.message;
       }
     },
-  })));
+  }));
 
   document.getElementById('unblock').hidden = false;
 }

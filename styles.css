@@ -47,6 +47,14 @@ button:hover { border-color: var(--muted); }
 button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
 button.ghost { background: none; border-color: transparent; color: var(--muted); padding: 4px 6px; }
 button.ghost:hover { color: var(--text); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button:disabled:hover { border-color: var(--border); }
+
+.picker-body { display: flex; flex-direction: column; gap: 8px; }
+textarea.reason {
+  width: 100%; font: inherit; padding: 6px 10px; resize: vertical;
+  border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); color: var(--text);
+}
 
 .durations { display: flex; flex-wrap: wrap; gap: 6px; }
 .error { color: var(--blocked); font-size: 12px; min-height: 1em; margin: 4px 0 0; }

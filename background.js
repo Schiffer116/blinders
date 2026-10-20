@@ -185,7 +185,17 @@ const handlers = {
   getSites: () => loadSites(),
   block: (msg) => block(msg.id),
   // The blocked page is itself the tab being unblocked; the popup passes the active tab's id.
-  unblock: (msg, sender) => unblock(msg.id, msg.minutes, msg.tabId ?? sender.tab?.id),
+  // The reason is only checked, not stored.
+  unblock: async (msg, sender) => {
+    if (!msg.reason?.trim()) throw new Error('Write down what you need this site for first');
+    return unblock(msg.id, msg.minutes, msg.tabId ?? sender.tab?.id);
+  },
+  // Replaces the limit of a running unblock, counted from now. It stays tied to the same tab.
+  changeLimit: async (msg) => {
+    const site = (await loadSites()).find((s) => s.id === msg.id);
+    if (!site || isBlocked(site)) throw new Error('That site is blocked again. Unblock it first.');
+    return unblock(msg.id, msg.minutes, site.unblockTab ?? msg.tabId);
+  },
   add: (msg) => add(msg),
   remove: (msg) => remove(msg.id),
 };

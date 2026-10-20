@@ -22,3 +22,32 @@ export function el(tag, { dataset, ...props } = {}, ...children) {
   node.append(...children.filter((c) => c != null));
   return node;
 }
+
+// Duration buttons for unblocking or changing a limit. With `reason`, the buttons stay disabled until
+// the "what do you need it for?" box has text, and onPick receives that text. `reason.draft` and
+// `reason.onInput` let a caller keep the typed text across re-renders.
+export function durationPicker(durations, { reason, onPick, extra = [] }) {
+  let box = null;
+  const buttons = durations.map((d) => el('button', {
+    textContent: d.label,
+    onclick: () => onPick(d, box?.value.trim()),
+  }));
+  const row = el('div', { className: 'durations' }, ...buttons, ...extra);
+  if (!reason) return row;
+
+  box = el('textarea', {
+    className: 'reason',
+    rows: 2,
+    placeholder: 'What do you actually need it for?',
+    ariaLabel: 'What do you need this site for?',
+    value: reason.draft ?? '',
+  });
+  const sync = () => {
+    const empty = !box.value.trim();
+    for (const b of buttons) b.disabled = empty;
+    reason.onInput?.(box.value);
+  };
+  box.addEventListener('input', sync);
+  sync();
+  return el('div', { className: 'picker-body' }, box, row);
+}
