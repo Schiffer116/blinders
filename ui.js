@@ -25,11 +25,13 @@ export function el(tag, { dataset, ...props } = {}, ...children) {
 
 // Duration buttons for unblocking or changing a limit. With `reason`, the buttons stay disabled until
 // the "what do you need it for?" box has text, and onPick receives that text. `reason.draft` and
-// `reason.onInput` let a caller keep the typed text across re-renders.
+// `reason.onInput` let a caller keep the typed text across re-renders. Enter in the box picks the
+// duration marked `default` (Shift+Enter still adds a line).
 export function durationPicker(durations, { reason, onPick, extra = [] }) {
   let box = null;
   const buttons = durations.map((d) => el('button', {
     textContent: d.label,
+    className: reason && d.default ? 'primary' : '',
     onclick: () => onPick(d, box?.value.trim()),
   }));
   const row = el('div', { className: 'durations' }, ...buttons, ...extra);
@@ -48,6 +50,12 @@ export function durationPicker(durations, { reason, onPick, extra = [] }) {
     reason.onInput?.(box.value);
   };
   box.addEventListener('input', sync);
+  box.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+    e.preventDefault();
+    const d = durations.find((x) => x.default);
+    if (d && box.value.trim()) onPick(d, box.value.trim());
+  });
   sync();
   return el('div', { className: 'picker-body' }, box, row);
 }

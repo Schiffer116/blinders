@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Blinders is a Manifest V3 Chrome extension that blocks distracting sites (Facebook, YouTube, Twitter/X, Pinterest, Reddit by default). Sites are blocked by default; the user can unblock one for 1 min, 5 min, 15 min, or with no time limit. Every unblock is tied to the tab it was made from, so the site re-blocks when the time runs out or that tab closes, whichever comes first.
+Blinders is a Manifest V3 Chrome extension that blocks distracting sites (Facebook, YouTube, Twitter/X, Pinterest, Reddit by default). Sites are blocked by default; the user can unblock one for 1 min (the default: type a reason, press Enter), 5 min, 15 min, or with no time limit. Every unblock is tied to the tab it was made from, so the site re-blocks when the time runs out or that tab closes, whichever comes first.
 
 Plain JS ES modules, no build step, no dependencies, no tests.
 
