@@ -4,7 +4,7 @@ import { randomQuote } from './quotes.js';
 
 const quote = randomQuote();
 document.getElementById('quote-text').textContent = `“${quote.text}”`;
-document.getElementById('quote-ref').textContent = `Marcus Aurelius, Meditations ${quote.ref}`;
+document.getElementById('quote-ref').textContent = `${quote.author}, ${quote.source}`;
 
 // The blocking rule puts the original URL after the '#'.
 const originalUrl = location.hash.slice(1);

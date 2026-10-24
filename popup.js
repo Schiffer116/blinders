@@ -37,10 +37,9 @@ function renderSite(site) {
   const open = (mode) => () => { picking = { id: site.id, mode }; reasonDraft = ''; render(); };
   const actions = blocked
     ? [el('button', { textContent: 'Unblock', onclick: open('unblock') })]
-    : [
+    : [el('div', { className: 'stacked' },
         el('button', { textContent: 'Change', title: 'Change the time limit', onclick: open('changeLimit') }),
-        el('button', { className: 'primary', textContent: 'Block now', onclick: () => run('block', { id: site.id }) }),
-      ];
+        el('button', { className: 'primary', textContent: 'Block now', onclick: () => run('block', { id: site.id }) }))];
 
   const row = el('div', { className: 'row' },
     el('span', { className: blocked ? 'dot' : 'dot open' }),
